@@ -1,10 +1,10 @@
-"""Presence Customiser : Rich Presence Discord entièrement personnalisable."""
+"""Presence Customiser: a fully customizable Discord Rich Presence."""
 
 __version__ = "1.0.0"
 DISPLAY_NAME = "Presence Customiser"
 
-# Dépôt GitHub du projet : alimente le bouton « Download Presence Customiser » de l'appli.
-# (La page docs/index.html a la même constante REPO en haut de son script.)
+# The project's GitHub repository: feeds the "Download Presence Customiser" button in the app.
+# (docs/index.html has the same REPO constant at the top of its script.)
 GITHUB_REPO = "zodiakgh/Presence-Customiser"
 
 REPO_URL = f"https://github.com/{GITHUB_REPO}"

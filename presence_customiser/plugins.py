@@ -1,4 +1,4 @@
-"""Plugins utilisateur : des fichiers .py qui ajoutent leurs propres variables."""
+"""User plugins: .py files that add their own variables."""
 from __future__ import annotations
 
 import importlib.util
@@ -25,14 +25,14 @@ def load_plugins(directory: Path) -> list[Plugin]:
             module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
             spec.loader.exec_module(module)  # type: ignore[union-attr]
             plugin.module = module
-        except Exception as exc:  # un plugin cassé ne doit jamais faire tomber l'appli
+        except Exception as exc:  # a broken plugin must never crash the app
             plugin.error = f"{type(exc).__name__}: {exc}"
         plugins.append(plugin)
     return plugins
 
 
 def run_plugins(plugins: list[Plugin], base_vars: dict) -> tuple[dict, list[str]]:
-    """Appelle get_variables(vars) et/ou VARIABLES = {nom: fonction} de chaque plugin."""
+    """Call get_variables(vars) and/or VARIABLES = {name: function} of each plugin."""
     out: dict = {}
     errors: list[str] = []
     for plugin in plugins:

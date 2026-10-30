@@ -1,4 +1,4 @@
-"""Moteur : collecte -> profil (règles) -> frame -> rendu -> envoi à Discord."""
+"""Engine: collect -> profile (rules) -> frame -> render -> send to Discord."""
 from __future__ import annotations
 
 import random
@@ -20,14 +20,14 @@ def _clamp(text: str, limit: int = 128) -> str:
     text = (text or "").strip()
     if len(text) > limit:
         text = text[: limit - 1].rstrip() + "…"
-    if len(text) == 1:  # Discord exige au moins 2 caractères
+    if len(text) == 1:  # Discord requires at least 2 characters
         text += "⠀"
     return text
 
 
 def build_payload(profile: dict, frame: dict, v: dict, ctx: var_mod.Context,
                   now: float, default_client_id: str = "") -> dict:
-    """Rend une frame en charge utile Discord valide (longueurs, boutons, groupe, timer)."""
+    """Render a frame into a valid Discord payload (lengths, buttons, party, timer)."""
     ptype = profile.get("type", "playing")
     payload: dict = {
         "client_id": str(profile.get("client_id") or default_client_id or "").strip(),
@@ -88,7 +88,7 @@ class Engine:
         self.enabled = False
         self.forced_profile: str | None = None
         self.snapshot: dict = {}
-        self.status = "Désactivé"
+        self.status = "Disabled"
         self._current_profile: str | None = None
         self._last_payload: dict | None = None
         self._last_sent = 0.0
@@ -114,10 +114,10 @@ class Engine:
             self.enabled = enabled
             self._last_payload = None
             if enabled:
-                self.status = "En attente de Discord…"
+                self.status = "Waiting for Discord…"
             else:
                 self._need_clear = True
-                self.status = "Désactivé"
+                self.status = "Disabled"
 
     def force_profile(self, name: str | None) -> None:
         with self._lock:
@@ -146,22 +146,22 @@ class Engine:
                     base[key] = ""
             v = dict(base)
             for key, value in (cfg.get("variables") or {}).items():
-                v[str(key)] = render(str(value), v)  # une variable perso peut utiliser les précédentes
+                v[str(key)] = render(str(value), v)  # a custom variable can use the previous ones
             extra, self.plugin_errors = plug_mod.run_plugins(self.plugins, v)
             v.update(extra)
 
             profiles = {p.get("name"): p for p in cfg.get("profiles", [])}
             if hidden:
                 name = (settings.get("privacy", {}) or {}).get("hidden_profile", "")
-                rule = "(confidentialité)"
+                rule = "(privacy)"
             elif self.forced_profile in profiles:
-                name, rule = self.forced_profile, "(forcé)"
+                name, rule = self.forced_profile, "(forced)"
             else:
                 name, rule = select_profile(cfg, v)
             profile = (profiles.get(name) or profiles.get(cfg.get("default_profile"))
                        or (cfg["profiles"][0] if cfg.get("profiles") else None))
             if profile is None:
-                self.snapshot = {"status": "Aucun profil défini", "vars": v, "payload": {},
+                self.snapshot = {"status": "No profile defined", "vars": v, "payload": {},
                                  "profile": "", "rule": None, "enabled": self.enabled, "connected": False}
                 return self.snapshot
 
@@ -207,7 +207,7 @@ class Engine:
             return
         client_id = payload.get("client_id")
         if not client_id:
-            self.status = "Client ID manquant (Réglages ou profil)."
+            self.status = "Missing Client ID (Settings or profile)."
             return
         if not self.rpc.connected or self.rpc.client_id != client_id:
             if now - self._last_connect < 8:
@@ -215,16 +215,16 @@ class Engine:
             self._last_connect = now
             self._last_payload = None
             if not self.rpc.connect(client_id):
-                self.status = self.rpc.last_error or "Connexion à Discord impossible."
+                self.status = self.rpc.last_error or "Could not connect to Discord."
                 return
         if payload != self._last_payload and now - self._last_sent >= min_interval:
             if self.rpc.update(payload):
                 self._last_payload, self._last_sent = payload, now
-                self.status = "Connecté : présence active"
+                self.status = "Connected: presence active"
             else:
-                self.status = self.rpc.last_error or "Échec de la mise à jour."
+                self.status = self.rpc.last_error or "Update failed."
         elif self.rpc.connected and self._last_payload is not None:
-            self.status = "Connecté : présence active"
+            self.status = "Connected: presence active"
 
     # ----------------------------------------------------------------- thread
     def start(self) -> None:
@@ -238,8 +238,8 @@ class Engine:
         while not self._stop.is_set():
             try:
                 self.tick()
-            except Exception as exc:  # le moteur ne doit jamais mourir
-                self.status = f"Erreur interne : {type(exc).__name__}: {exc}"
+            except Exception as exc:  # the engine must never die
+                self.status = f"Internal error: {type(exc).__name__}: {exc}"
             self._stop.wait(1.0)
         if self.rpc is not None:
             self.rpc.clear()

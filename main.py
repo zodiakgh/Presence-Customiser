@@ -1,9 +1,9 @@
-"""Point d'entrée de Presence Customiser.
+"""Presence Customiser entry point.
 
-  python main.py              -> interface graphique
-  python main.py --minimized  -> démarre réduit (tray)
-  python main.py --headless   -> sans interface, dans le terminal
-  python main.py --once       -> calcule une fois la présence et l'affiche (test, rien n'est envoyé)
+  python main.py              -> graphical interface
+  python main.py --minimized  -> start minimized (tray)
+  python main.py --headless   -> no interface, runs in the terminal
+  python main.py --once       -> compute the presence once and print it (test, nothing is sent)
 """
 import argparse
 import json
@@ -16,10 +16,10 @@ from presence_customiser.rpc import RPCClient
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Presence Customiser : Rich Presence Discord personnalisable")
-    parser.add_argument("--minimized", action="store_true", help="démarrer réduit dans la barre système")
-    parser.add_argument("--headless", action="store_true", help="lancer sans interface graphique")
-    parser.add_argument("--once", action="store_true", help="afficher la présence calculée et quitter")
+    parser = argparse.ArgumentParser(description="Presence Customiser: a fully customizable Discord Rich Presence")
+    parser.add_argument("--minimized", action="store_true", help="start minimized to the system tray")
+    parser.add_argument("--headless", action="store_true", help="run without the graphical interface")
+    parser.add_argument("--once", action="store_true", help="print the computed presence and exit")
     args = parser.parse_args()
 
     cfg = config.load_config()
@@ -34,7 +34,7 @@ def main() -> int:
         engine = Engine(cfg, rpc=None, plugins_dir=plugins_dir)
         engine.ctx.cached("spotify", 0, lambda: "")
         snap = engine.tick(send=False)
-        print(json.dumps({"profil": snap["profile"], "règle": snap["rule"],
+        print(json.dumps({"profile": snap["profile"], "rule": snap["rule"],
                           "payload": snap["payload"], "variables": snap["vars"]},
                          ensure_ascii=False, indent=2, default=list))
         return 0
@@ -44,7 +44,7 @@ def main() -> int:
     if args.headless:
         engine.set_enabled(True)
         engine.start()
-        print("Presence Customiser lancé (Ctrl+C pour quitter).")
+        print("Presence Customiser started (Ctrl+C to quit).")
         try:
             while True:
                 time.sleep(5)

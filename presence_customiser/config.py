@@ -1,4 +1,4 @@
-"""Configuration de Presence Customiser : chargement, sauvegarde, validation."""
+"""Presence Customiser configuration: loading, saving, validation."""
 from __future__ import annotations
 
 import copy
@@ -13,7 +13,7 @@ CONFIG_VERSION = 1
 
 
 def home_dir() -> Path:
-    """Dossier de données de l'appli (config + plugins)."""
+    """App data folder (config + plugins)."""
     env = os.environ.get("PRESENCE_CUSTOMISER_HOME")
     if env:
         base = Path(env)
@@ -32,7 +32,7 @@ def config_path() -> Path:
 def default_config() -> dict:
     return {
         "version": CONFIG_VERSION,
-        "default_profile": "Défaut",
+        "default_profile": "Default",
         "settings": {
             "client_id": "",
             "min_interval": 15,
@@ -44,13 +44,13 @@ def default_config() -> dict:
             "accent": "#7c5cff",
             "privacy": {
                 "hidden_processes": ["KeePass.exe", "KeePassXC.exe", "Bitwarden.exe", "1Password.exe"],
-                "hidden_words": ["mot de passe", "password", "banque", "bank"],
-                "hidden_profile": "Privé",
+                "hidden_words": ["password", "bank", "banking"],
+                "hidden_profile": "Private",
             },
         },
         "variables": {
-            "pseudo": "MonPseudo",
-            "statut": "Disponible",
+            "nickname": "MyNickname",
+            "status": "Available",
         },
         "app_names": {
             "Code.exe": "VS Code",
@@ -66,7 +66,7 @@ def default_config() -> dict:
         },
         "profiles": [
             {
-                "name": "Défaut",
+                "name": "Default",
                 "type": "playing",
                 "client_id": "",
                 "timer": "session",
@@ -75,10 +75,10 @@ def default_config() -> dict:
                 "shuffle": False,
                 "frames": [
                     {
-                        "details": "En ligne depuis {session}",
+                        "details": "Online for {session}",
                         "state": "{weekday|cap} • {time}",
                         "large_image": "",
-                        "large_text": "{pseudo}",
+                        "large_text": "{nickname}",
                         "small_image": "",
                         "small_text": "",
                         "party": "",
@@ -89,7 +89,7 @@ def default_config() -> dict:
                         "details": "CPU {cpu}% • RAM {ram}%",
                         "state": "{cpu|bar:10}",
                         "large_image": "",
-                        "large_text": "{pseudo}",
+                        "large_text": "{nickname}",
                         "small_image": "",
                         "small_text": "",
                         "party": "",
@@ -99,7 +99,7 @@ def default_config() -> dict:
                 ],
             },
             {
-                "name": "Code",
+                "name": "Coding",
                 "type": "playing",
                 "client_id": "",
                 "timer": "profile",
@@ -108,10 +108,10 @@ def default_config() -> dict:
                 "shuffle": False,
                 "frames": [
                     {
-                        "details": "Code : {project?un projet}",
-                        "state": "Fichier : {file?…|noext}",
+                        "details": "Coding: {project?a project}",
+                        "state": "File: {file?…|noext}",
                         "large_image": "",
-                        "large_text": "{app?Éditeur}",
+                        "large_text": "{app?Editor}",
                         "small_image": "",
                         "small_text": "",
                         "party": "",
@@ -119,10 +119,10 @@ def default_config() -> dict:
                         "buttons": [],
                     },
                     {
-                        "details": "{statut}",
-                        "state": "Session : {profile_time}",
+                        "details": "{status}",
+                        "state": "Session: {profile_time}",
                         "large_image": "",
-                        "large_text": "{pseudo}",
+                        "large_text": "{nickname}",
                         "small_image": "",
                         "small_text": "",
                         "party": "",
@@ -132,7 +132,7 @@ def default_config() -> dict:
                 ],
             },
             {
-                "name": "Jeu",
+                "name": "Gaming",
                 "type": "playing",
                 "client_id": "",
                 "timer": "profile",
@@ -141,10 +141,10 @@ def default_config() -> dict:
                 "shuffle": False,
                 "frames": [
                     {
-                        "details": "Joue à {app?un jeu}",
-                        "state": "Depuis {profile_time}",
+                        "details": "Playing {app?a game}",
+                        "state": "For {profile_time}",
                         "large_image": "",
-                        "large_text": "{pseudo}",
+                        "large_text": "{nickname}",
                         "small_image": "",
                         "small_text": "",
                         "party": "",
@@ -154,7 +154,7 @@ def default_config() -> dict:
                 ],
             },
             {
-                "name": "Musique",
+                "name": "Music",
                 "type": "listening",
                 "client_id": "",
                 "timer": "none",
@@ -176,7 +176,7 @@ def default_config() -> dict:
                 ],
             },
             {
-                "name": "Inactif",
+                "name": "Idle",
                 "type": "playing",
                 "client_id": "",
                 "timer": "profile",
@@ -185,10 +185,10 @@ def default_config() -> dict:
                 "shuffle": False,
                 "frames": [
                     {
-                        "details": "Absent",
-                        "state": "Inactif depuis {idle_min} min",
+                        "details": "Away",
+                        "state": "Idle for {idle_min} min",
                         "large_image": "",
-                        "large_text": "{pseudo}",
+                        "large_text": "{nickname}",
                         "small_image": "",
                         "small_text": "",
                         "party": "",
@@ -198,7 +198,7 @@ def default_config() -> dict:
                 ],
             },
             {
-                "name": "Nuit",
+                "name": "Night",
                 "type": "playing",
                 "client_id": "",
                 "timer": "none",
@@ -207,10 +207,10 @@ def default_config() -> dict:
                 "shuffle": False,
                 "frames": [
                     {
-                        "details": "Mode nuit",
+                        "details": "Night mode",
                         "state": "{time}",
                         "large_image": "",
-                        "large_text": "{pseudo}",
+                        "large_text": "{nickname}",
                         "small_image": "",
                         "small_text": "",
                         "party": "",
@@ -220,7 +220,7 @@ def default_config() -> dict:
                 ],
             },
             {
-                "name": "Privé",
+                "name": "Private",
                 "type": "playing",
                 "client_id": "",
                 "timer": "none",
@@ -229,7 +229,7 @@ def default_config() -> dict:
                 "shuffle": False,
                 "frames": [
                     {
-                        "details": "En ligne",
+                        "details": "Online",
                         "state": "",
                         "large_image": "",
                         "large_text": "",
@@ -243,33 +243,33 @@ def default_config() -> dict:
             },
         ],
         "rules": [
-            {"name": "Inactif", "profile": "Inactif", "priority": 90, "enabled": True,
+            {"name": "Idle", "profile": "Idle", "priority": 90, "enabled": True,
              "when": {"idle_over": 300}},
-            {"name": "Jeux", "profile": "Jeu", "priority": 60, "enabled": True,
+            {"name": "Gaming", "profile": "Gaming", "priority": 60, "enabled": True,
              "when": {"process": ["javaw.exe", "Minecraft.Windows.exe", "RobloxPlayerBeta.exe"]}},
-            {"name": "Code", "profile": "Code", "priority": 50, "enabled": True,
+            {"name": "Coding", "profile": "Coding", "priority": 50, "enabled": True,
              "when": {"process": ["Code.exe", "Cursor.exe", "pycharm64.exe", "idea64.exe",
                                   "WindowsTerminal.exe", "sublime_text.exe", "notepad++.exe"]}},
-            {"name": "Musique", "profile": "Musique", "priority": 20, "enabled": True,
+            {"name": "Music", "profile": "Music", "priority": 20, "enabled": True,
              "when": {"expr": "spotify"}},
-            {"name": "Nuit", "profile": "Nuit", "priority": 5, "enabled": True,
+            {"name": "Night", "profile": "Night", "priority": 5, "enabled": True,
              "when": {"time_between": "00:00-06:00"}},
         ],
     }
 
 
-EXAMPLE_PLUGIN = '''"""Exemple de plugin Presence Customiser.
+EXAMPLE_PLUGIN = '''"""Presence Customiser example plugin.
 
-Un plugin est un fichier .py placé dans le dossier "plugins".
-Il expose get_variables(vars) qui retourne un dict {nom: valeur}.
-Ces variables sont ensuite utilisables dans les templates : {quote}, {emoji_clock}...
-`vars` contient toutes les variables déjà calculées (time, cpu, app, ...).
+A plugin is a .py file placed in the "plugins" folder.
+It exposes get_variables(vars), which returns a dict {name: value}.
+These variables can then be used in templates: {quote}, {emoji_clock}...
+`vars` holds every variable already computed (time, cpu, app, ...).
 """
 import time
 
 QUOTES = [
-    "Un bug à la fois.",
-    "Ça marche sur ma machine.",
+    "One bug at a time.",
+    "Works on my machine.",
     "Premature optimization is the root of all evil.",
     "Make it work, make it right, make it fast.",
 ]
@@ -303,7 +303,7 @@ def _merge(defaults: dict, user: dict) -> dict:
 
 
 def normalize(cfg: dict) -> dict:
-    """Fusionne avec les valeurs par défaut : seul `settings` est fusionné en profondeur."""
+    """Merge with the defaults: only `settings` is deep-merged."""
     base = default_config()
     out = copy.deepcopy(base)
     for key, value in cfg.items():
@@ -323,7 +323,7 @@ def load_config(path: Path | None = None) -> dict:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
-            raise ValueError("la racine doit être un objet JSON")
+            raise ValueError("the root must be a JSON object")
         return normalize(data)
     except Exception:
         shutil.copy2(path, path.with_suffix(".broken.json"))
@@ -343,30 +343,30 @@ def validate_config(cfg: dict) -> list[str]:
     problems: list[str] = []
     profiles = cfg.get("profiles") or []
     if not profiles:
-        problems.append("Aucun profil défini.")
+        problems.append("No profile defined.")
     names = [p.get("name", "") for p in profiles]
     for name in sorted(set(names)):
         if names.count(name) > 1:
-            problems.append(f"Nom de profil en double : « {name} ».")
+            problems.append(f"Duplicate profile name: '{name}'.")
     if cfg.get("default_profile") not in names:
-        problems.append("Le profil par défaut n'existe pas.")
+        problems.append("The default profile does not exist.")
     for profile in profiles:
         pname = profile.get("name", "?")
         frames = profile.get("frames") or []
         if not frames:
-            problems.append(f"Profil « {pname} » : aucune frame.")
+            problems.append(f"Profile '{pname}': no frames.")
         for i, frame in enumerate(frames, 1):
             buttons = frame.get("buttons") or []
             if len(buttons) > 2:
-                problems.append(f"Profil « {pname} », frame {i} : 2 boutons maximum.")
+                problems.append(f"Profile '{pname}', frame {i}: 2 buttons maximum.")
             for button in buttons:
                 url = button.get("url", "")
                 if url and "{" not in url and not url.startswith(("http://", "https://")):
-                    problems.append(f"Profil « {pname} », frame {i} : URL de bouton invalide ({url}).")
+                    problems.append(f"Profile '{pname}', frame {i}: invalid button URL ({url}).")
     for rule in cfg.get("rules") or []:
         if rule.get("profile") not in names:
-            problems.append(f"Règle « {rule.get('name', '?')} » : profil introuvable.")
+            problems.append(f"Rule '{rule.get('name', '?')}': profile not found.")
     hidden = (cfg.get("settings", {}).get("privacy", {}) or {}).get("hidden_profile")
     if hidden and hidden not in names:
-        problems.append(f"Profil de confidentialité « {hidden} » introuvable.")
+        problems.append(f"Privacy profile '{hidden}' not found.")
     return problems

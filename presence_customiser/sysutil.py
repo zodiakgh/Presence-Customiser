@@ -1,4 +1,4 @@
-"""Petits utilitaires système (démarrage automatique avec Windows)."""
+"""Small system utilities (launch with Windows)."""
 from __future__ import annotations
 
 import sys
@@ -32,7 +32,7 @@ def is_autostart_enabled() -> bool:
 
 
 def set_autostart(enabled: bool) -> bool:
-    """Active/désactive le lancement au démarrage de Windows. Retourne False si impossible."""
+    """Enable/disable launching at Windows startup. Returns False if not possible."""
     if sys.platform != "win32":
         return False
     try:

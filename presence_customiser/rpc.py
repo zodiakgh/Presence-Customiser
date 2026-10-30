@@ -1,18 +1,18 @@
-"""Connexion à Discord (Rich Presence via IPC local, bibliothèque pypresence).
+"""Connection to Discord (Rich Presence over local IPC, using the pypresence library).
 
-Important : tous les appels doivent venir du même thread (boucle asyncio dédiée),
-c'est le thread du moteur qui s'en charge.
+Important: every call must come from the same thread (dedicated asyncio loop);
+the engine thread takes care of that.
 """
 from __future__ import annotations
 
 import asyncio
 
 _ERRORS = {
-    "DiscordNotFound": "Discord introuvable : lance l'application Discord (pas le navigateur).",
-    "InvalidID": "Client ID invalide : vérifie l'Application ID du portail développeur.",
-    "InvalidPipe": "Discord ne répond pas, réessaie dans un instant.",
-    "ConnectionRefusedError": "Connexion refusée par Discord.",
-    "FileNotFoundError": "Discord introuvable : lance l'application Discord (pas le navigateur).",
+    "DiscordNotFound": "Discord not found: start the Discord desktop app (not the browser).",
+    "InvalidID": "Invalid Client ID: check the Application ID in the developer portal.",
+    "InvalidPipe": "Discord is not responding, try again in a moment.",
+    "ConnectionRefusedError": "Connection refused by Discord.",
+    "FileNotFoundError": "Discord not found: start the Discord desktop app (not the browser).",
 }
 
 
@@ -28,7 +28,7 @@ class RPCClient:
         try:
             from pypresence import Presence
         except ImportError:
-            self.last_error = "pypresence n'est pas installé (pip install pypresence)."
+            self.last_error = "pypresence is not installed (pip install pypresence)."
             return False
         try:
             loop = asyncio.new_event_loop()
@@ -63,7 +63,7 @@ class RPCClient:
         try:
             try:
                 self._rpc.update(**kwargs)
-            except TypeError:  # ancienne version de pypresence sans activity_type
+            except TypeError:  # older pypresence without activity_type
                 kwargs.pop("activity_type", None)
                 self._rpc.update(**kwargs)
             return True

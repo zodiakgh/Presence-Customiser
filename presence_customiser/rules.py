@@ -1,4 +1,4 @@
-"""Règles automatiques : choisir le profil selon l'activité (processus, fenêtre, heure, CPU...)."""
+"""Automatic rules: pick the profile from activity (process, window, time, CPU...)."""
 from __future__ import annotations
 
 import re
@@ -42,7 +42,7 @@ def _time_between(spec: str, now_hhmm: str) -> bool:
 
 
 def match_when(when: dict, v: dict) -> bool:
-    """Toutes les clés présentes doivent correspondre (ET logique)."""
+    """Every key that is present must match (logical AND)."""
     if not when:
         return False
     process = v.get("process", "").lower()
@@ -80,9 +80,9 @@ def match_when(when: dict, v: dict) -> bool:
 
 
 def select_profile(cfg: dict, v: dict) -> tuple[str, str | None]:
-    """Retourne (nom du profil, nom de la règle) ; règle None = profil par défaut."""
+    """Return (profile name, rule name); rule None = default profile."""
     rules = [r for r in cfg.get("rules", []) if r.get("enabled", True)]
-    rules.sort(key=lambda r: -_num(r.get("priority", 0)))  # tri stable : l'ordre de la liste départage
+    rules.sort(key=lambda r: -_num(r.get("priority", 0)))  # stable sort: list order breaks ties
     for rule in rules:
         if match_when(rule.get("when") or {}, v):
             return rule.get("profile", ""), rule.get("name")

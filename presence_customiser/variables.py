@@ -1,4 +1,4 @@
-"""Collecte des variables dynamiques (heure, CPU, fenêtre active, projet VS Code, Spotify...)."""
+"""Dynamic variables (time, CPU, active window, VS Code project, Spotify...)."""
 from __future__ import annotations
 
 import ctypes
@@ -12,10 +12,10 @@ from datetime import datetime
 
 try:
     import psutil
-except ImportError:  # l'appli reste utilisable, avec moins de variables
+except ImportError:  # the app stays usable, with fewer variables
     psutil = None
 
-WEEKDAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 EDITOR_SUFFIXES = (
     "Visual Studio Code", "Cursor", "VSCodium", "Windsurf", "Sublime Text",
     "PyCharm", "IntelliJ IDEA", "WebStorm", "CLion", "Notepad++",
@@ -24,7 +24,7 @@ SPOTIFY_IDLE_TITLES = {"spotify", "spotify free", "spotify premium"}
 
 
 class Context:
-    """État partagé entre les ticks (démarrage, profil courant, petit cache)."""
+    """State shared between ticks (start time, current profile, small cache)."""
 
     def __init__(self) -> None:
         self.app_start = time.time()
@@ -55,7 +55,7 @@ def humanize(seconds: float) -> str:
     return f"{days}j {hours}h"
 
 
-# ------------------------------------------------------------ fenêtre active
+# ------------------------------------------------------------ active window
 
 def _win_process_name(pid: int) -> str:
     if psutil is None:
@@ -91,7 +91,7 @@ def _linux_active_window() -> tuple[str, str]:
 
 
 def get_active_window() -> tuple[str, str]:
-    """(nom du processus, titre de la fenêtre) au premier plan."""
+    """(process name, window title) of the foreground window."""
     try:
         if sys.platform == "win32":
             return _win_active_window()
@@ -143,7 +143,7 @@ def _win_titles_of(process_name: str) -> list[str]:
 
 
 def get_spotify_track() -> str:
-    """Titre en cours ("Artiste - Titre") via la fenêtre Spotify, sinon ""."""
+    """Current track ("Artist - Title") from the Spotify window, else ""."""
     if sys.platform != "win32":
         return ""
     try:
@@ -156,7 +156,7 @@ def get_spotify_track() -> str:
 
 
 def parse_editor_title(title: str) -> tuple[str, str]:
-    """Extrait (fichier, projet) d'un titre d'éditeur : « fichier - projet - Visual Studio Code »."""
+    """Extract (file, project) from an editor title: "file - project - Visual Studio Code"."""
     norm = title.replace(" – ", " - ").replace(" — ", " - ")
     for suffix in EDITOR_SUFFIXES:
         if norm.endswith(suffix) or f" - {suffix}" in norm:
@@ -164,16 +164,16 @@ def parse_editor_title(title: str) -> tuple[str, str]:
             parts = [p.strip() for p in body.split(" - ") if p.strip()]
             if not parts:
                 return "", ""
-            if suffix in ("PyCharm", "IntelliJ IDEA", "WebStorm", "CLion"):  # « projet - fichier »
+            if suffix in ("PyCharm", "IntelliJ IDEA", "WebStorm", "CLion"):  # "project - file"
                 return (parts[1] if len(parts) > 1 else ""), parts[0]
             return parts[0], (parts[1] if len(parts) > 1 else "")
     return "", ""
 
 
-# ------------------------------------------------------------------ collecte
+# ------------------------------------------------------------------ collection
 
 def collect(ctx: Context, cfg: dict, now: float | None = None) -> dict:
-    """Variables intégrées (hors variables perso et plugins)."""
+    """Built-in variables (excluding custom variables and plugins)."""
     now = time.time() if now is None else now
     dt = datetime.fromtimestamp(now)
     process, window = get_active_window()
@@ -198,7 +198,7 @@ def collect(ctx: Context, cfg: dict, now: float | None = None) -> dict:
         uptime = ""
 
     hour = dt.hour
-    day_part = "matin" if 5 <= hour < 12 else "après-midi" if 12 <= hour < 18 else "soir" if 18 <= hour < 22 else "nuit"
+    day_part = "morning" if 5 <= hour < 12 else "afternoon" if 12 <= hour < 18 else "evening" if 18 <= hour < 22 else "night"
     spotify = ctx.cached("spotify", 5.0, get_spotify_track)
 
     return {

@@ -1,4 +1,4 @@
-"""Tests du moteur (sans Discord ni interface) : python tests/test_engine.py"""
+"""Engine tests (no Discord, no UI): python tests/test_engine.py"""
 import os
 import sys
 import tempfile
@@ -49,7 +49,7 @@ def make_engine(rpc=None):
 def test_templates():
     v = {"cpu": "40", "name": "ben", "empty": "", "long": "abcdefghij"}
     assert render("{name|upper}", v) == "BEN"
-    assert render("{empty?rien}", v) == "rien"
+    assert render("{empty?none}", v) == "none"
     assert render("{missing}x", v) == "x"
     assert render("{long|trunc:5}", v) == "abcd…"
     assert render("{cpu|bar:10}", v) == "▰▰▰▰▱▱▱▱▱▱"
@@ -84,19 +84,19 @@ def test_rule_selection():
     eng = make_engine()
     fake_env("Code.exe", "main.py - presence_customiser - Visual Studio Code")
     snap = eng.tick(send=False)
-    assert snap["profile"] == "Code" and snap["rule"] == "Code", snap["profile"]
-    assert snap["payload"]["details"] == "Code : presence_customiser", snap["payload"]
-    assert snap["payload"]["state"] == "Fichier : main", snap["payload"]
+    assert snap["profile"] == "Coding" and snap["rule"] == "Coding", snap["profile"]
+    assert snap["payload"]["details"] == "Coding: presence_customiser", snap["payload"]
+    assert snap["payload"]["state"] == "File: main", snap["payload"]
 
     fake_env("javaw.exe", "Minecraft 1.21")
-    assert make_engine().tick(send=False)["profile"] == "Jeu"
+    assert make_engine().tick(send=False)["profile"] == "Gaming"
 
-    fake_env("explorer.exe", "Dossier", idle=400)
+    fake_env("explorer.exe", "Folder", idle=400)
     snap = make_engine().tick(send=False)
-    assert snap["profile"] == "Inactif" and "6 min" in snap["payload"]["state"]
+    assert snap["profile"] == "Idle" and "6 min" in snap["payload"]["state"]
 
-    fake_env("explorer.exe", "Dossier")
-    assert make_engine().tick(send=False)["profile"] in ("Défaut", "Nuit", "Musique")
+    fake_env("explorer.exe", "Folder")
+    assert make_engine().tick(send=False)["profile"] in ("Default", "Night", "Music")
 
 
 def test_time_rule():
@@ -104,29 +104,29 @@ def test_time_rule():
     eng = make_engine()
     import time
     base = time.mktime((2026, 10, 30, 3, 0, 0, 0, 0, -1))
-    assert eng.tick(now=base, send=False)["profile"] == "Nuit"
+    assert eng.tick(now=base, send=False)["profile"] == "Night"
     noon = time.mktime((2026, 10, 30, 12, 0, 0, 0, 0, -1))
-    assert eng.tick(now=noon, send=False)["profile"] == "Défaut"
+    assert eng.tick(now=noon, send=False)["profile"] == "Default"
 
 
 def test_privacy():
     eng = make_engine()
-    fake_env("KeePassXC.exe", "Base de données")
+    fake_env("KeePassXC.exe", "Database")
     snap = eng.tick(send=False)
-    assert snap["profile"] == "Privé" and snap["rule"] == "(confidentialité)"
+    assert snap["profile"] == "Private" and snap["rule"] == "(privacy)"
     assert snap["vars"]["window"] == "" and snap["vars"]["process"] == ""
-    fake_env("chrome.exe", "Ma banque en ligne - Chrome")
-    assert make_engine().tick(send=False)["profile"] == "Privé"
+    fake_env("chrome.exe", "My bank online - Chrome")
+    assert make_engine().tick(send=False)["profile"] == "Private"
 
 
 def test_forced_profile_and_rotation():
     fake_env("explorer.exe", "x")
     eng = make_engine()
-    eng.force_profile("Défaut")
+    eng.force_profile("Default")
     import time
     t0 = time.time()
     first = eng.tick(now=t0, send=False)
-    assert first["rule"] == "(forcé)"
+    assert first["rule"] == "(forced)"
     d0 = first["payload"]["details"]
     later = eng.tick(now=t0 + 31, send=False)
     assert later["frame_index"] == 1 and later["payload"]["details"] != d0
@@ -136,20 +136,20 @@ def test_send_throttle_and_clear():
     fake_env("explorer.exe", "x")
     rpc = FakeRPC()
     eng = make_engine(rpc)
-    eng.force_profile("Défaut")  # indépendant de l'heure (la règle « Nuit » s'applique de 0h à 6h)
+    eng.force_profile("Default")  # independent of the time of day (the "Night" rule applies from 00:00 to 06:00)
     import time
     t0 = time.time()
-    eng.tick(now=t0)                 # désactivé -> rien d'envoyé
+    eng.tick(now=t0)                 # disabled -> nothing sent
     assert rpc.sent == []
     eng.set_enabled(True)
     eng.tick(now=t0 + 1)
     assert len(rpc.sent) == 1 and rpc.client_id == "123456789012345678"
-    eng.cfg["variables"]["pseudo"] = "Autre"
-    eng.cfg["profiles"][0]["frames"][0]["details"] = "{pseudo} change"
-    eng.tick(now=t0 + 5)             # < 15 s : pas d'envoi
+    eng.cfg["variables"]["nickname"] = "Other"
+    eng.cfg["profiles"][0]["frames"][0]["details"] = "{nickname} change"
+    eng.tick(now=t0 + 5)             # < 15 s: no send
     assert len(rpc.sent) == 1
-    eng.tick(now=t0 + 20)            # >= 15 s : envoi
-    assert len(rpc.sent) == 2 and rpc.sent[-1]["details"] == "Autre change"
+    eng.tick(now=t0 + 20)            # >= 15 s: send
+    assert len(rpc.sent) == 2 and rpc.sent[-1]["details"] == "Other change"
     eng.set_enabled(False)
     eng.tick(now=t0 + 30)
     assert rpc.cleared >= 1 and not rpc.connected
@@ -162,9 +162,9 @@ def test_payload_validation():
     frame.update({"details": "a", "state": "x" * 300, "large_image": "img", "large_text": "tip",
                   "party": "2/4",
                   "buttons": [{"label": "Ok", "url": "https://example.com"},
-                              {"label": "Mauvais", "url": "javascript:alert(1)"},
-                              {"label": "Trop", "url": "https://example.org"}]})
-    eng.force_profile("Défaut")
+                              {"label": "Bad", "url": "javascript:alert(1)"},
+                              {"label": "Extra", "url": "https://example.org"}]})
+    eng.force_profile("Default")
     p = eng.tick(send=False)["payload"]
     assert len(p["details"]) == 2 and len(p["state"]) == 128
     assert p["party"] == (2, 4)
@@ -176,12 +176,12 @@ def test_custom_vars_plugins_countdown():
     fake_env("explorer.exe", "x")
     config.ensure_example_plugin()
     eng = make_engine()
-    eng.cfg["variables"]["combo"] = "{pseudo} @ {time}"
+    eng.cfg["variables"]["combo"] = "{nickname} @ {time}"
     eng.cfg["profiles"][0]["frames"][0]["details"] = "{combo} {quote|trunc:8} {emoji_clock}"
     eng.cfg["profiles"][0]["timer"] = "countdown"
-    eng.force_profile("Défaut")
+    eng.force_profile("Default")
     snap = eng.tick(send=False)
-    assert snap["payload"]["details"].startswith("MonPseudo @ "), snap["payload"]["details"]
+    assert snap["payload"]["details"].startswith("MyNickname @ "), snap["payload"]["details"]
     assert "end" in snap["payload"] and "start" not in snap["payload"]
     assert not snap["plugin_errors"], snap["plugin_errors"]
 
@@ -191,8 +191,8 @@ def test_config_roundtrip_and_broken_file():
     cfg["variables"]["x"] = "é"
     config.save_config(cfg)
     assert config.load_config()["variables"]["x"] == "é"
-    config.config_path().write_text("{pas du json", encoding="utf-8")
-    assert config.load_config()["default_profile"] == "Défaut"
+    config.config_path().write_text("{not json", encoding="utf-8")
+    assert config.load_config()["default_profile"] == "Default"
     assert config.config_path().with_suffix(".broken.json").exists()
 
 

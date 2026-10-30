@@ -1,8 +1,8 @@
-"""Test fumée de l'interface avec un faux toolkit (aucun affichage, tkinter non requis).
+"""Smoke test of the interface with a fake toolkit (no display, tkinter not required).
 
-Il exécute toute la logique de ui.py (formulaires, ajout/suppression de profils, règles,
-réglages, JSON, boutons de téléchargement) pour détecter les erreurs de code.
-Il ne remplace pas un vrai lancement : `python main.py` sur Windows reste le test final.
+It runs all the logic of ui.py (forms, adding/removing profiles, rules, settings, JSON,
+download buttons) to catch code errors. It does not replace a real launch:
+`python main.py` on Windows remains the final test.
 """
 import json
 import os
@@ -81,7 +81,7 @@ def main():
     try:
         app.dashboard.refresh(engine.tick(send=False), engine)
 
-        # --- profils et frames
+        # --- profiles and frames
         pt = app.profiles_tab
         n = len(cfg["profiles"])
         pt.add_profile()
@@ -101,14 +101,14 @@ def main():
         assert streaming["frames"][0]["buttons"] == [{"label": "Site", "url": "https://example.com"}]
         assert len(streaming["frames"]) == 2
 
-        # renommage : les références suivent
+        # renaming: references follow
         pt.pv["name"].set("Live")
         pt.save()
         assert any(p["name"] == "Live" for p in cfg["profiles"])
         pt.dup_profile()
         pt.del_profile()
 
-        # --- règles
+        # --- rules
         rt = app.rules_tab
         rt.add()
         rt.name.set("Test")
@@ -127,7 +127,7 @@ def main():
         app.vars_tab.save()
         assert cfg["variables"] == {"a": "1", "b": "{a} 2"} and cfg["app_names"] == {"x.exe": "X"}
 
-        # --- réglages
+        # --- settings
         st = app.settings_tab
         st.client_id.set("999")
         st.min_interval.set("3")
@@ -136,20 +136,20 @@ def main():
         assert cfg["settings"]["client_id"] == "999" and cfg["settings"]["min_interval"] == 15
         assert cfg["settings"]["privacy"]["hidden_processes"] == ["A.exe", "B.exe"]
 
-        # --- JSON : valide puis invalide
+        # --- JSON: valid, then invalid
         app.json_tab.box.get = lambda *_a: json.dumps(cfg)
         app.json_tab.apply()
         assert app.cfg is engine.cfg
         before = app.cfg
-        app.json_tab.box.get = lambda *_a: "{pas du json"
+        app.json_tab.box.get = lambda *_a: "{not json"
         app.json_tab.apply()
         assert app.cfg is before
 
-        # --- boutons Download : ouvrent les releases ; une URL avec OWNER (modèle non rempli) est bloquée
+        # --- Download buttons: open the releases; a URL containing OWNER (unfilled template) is blocked
         opened = []
         ui.webbrowser.open = lambda url: opened.append(url)
         app.open_url("https://github.com/OWNER/presence-customiser/releases/latest")
-        assert opened == [], "ne doit pas ouvrir une URL contenant OWNER"
+        assert opened == [], "must not open a URL containing OWNER"
         app.open_releases()
         assert opened == [ui.RELEASES_URL]
         assert ui.RELEASES_URL == "https://github.com/zodiakgh/Presence-Customiser/releases/latest"

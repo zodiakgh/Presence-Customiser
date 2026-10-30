@@ -1,4 +1,4 @@
-"""Moteur de templates : {variable|filtre:arg|filtre?valeur_par_defaut} + conditions simples."""
+"""Template engine: {variable?default|filter:arg} + simple conditions."""
 from __future__ import annotations
 
 import re
@@ -65,7 +65,7 @@ def apply_filter(spec: str, value) -> str:
 
 
 def render(template: str, variables: dict) -> str:
-    """Remplace {var}, {var?défaut}, {var|filtre:arg|filtre2} dans le texte."""
+    """Replace {var}, {var?default}, {var?default|filter:arg|filter2} in the text."""
     if not template:
         return ""
 
@@ -120,7 +120,7 @@ def _check_one(part: str, variables: dict) -> bool:
 
 
 def check_condition(expr: str, variables: dict) -> bool:
-    """Ex : "cpu > 80", "app == Chrome and hour >= 22", "spotify", "!project", "window contains youtube"."""
+    """Examples: "cpu > 80", "app == Chrome and hour >= 22", "spotify", "!project", "window contains youtube"."""
     expr = (expr or "").strip()
     if not expr:
         return True
