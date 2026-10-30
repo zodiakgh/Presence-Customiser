@@ -1,0 +1,5 @@
+customtkinter>=5.2
+pypresence>=4.3
+psutil>=5.9
+pystray>=0.19
+Pillow>=10.0
